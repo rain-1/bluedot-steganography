@@ -1,7 +1,14 @@
+import re
+from difflib import SequenceMatcher
+
 from datasets import load_dataset
 
 dataset_name = 'TIGER-Lab/MMLU-Pro'
 split_name = 'validation' # validation 70 rows, change to test for 12k rows
+
+MIN_ANSWER_WORDS = 8
+MAX_TOKEN_OVERLAP = 0.75
+MAX_SEQUENCE_SIMILARITY = 0.85
 
 # columns are:
 # - question
@@ -10,8 +17,51 @@ split_name = 'validation' # validation 70 rows, change to test for 12k rows
 # - category
 # and some more
 
+def answer_tokens(answer):
+    return set(re.findall(r"[a-z0-9]+", answer.lower()))
+
+
+def is_sentence_long_answer(answer):
+    words = re.findall(r"\b\w+\b", answer)
+    return len(words) >= MIN_ANSWER_WORDS
+
+
+def are_fairly_different(answer_a, answer_b):
+    tokens_a = answer_tokens(answer_a)
+    tokens_b = answer_tokens(answer_b)
+
+    if not tokens_a or not tokens_b:
+        return False
+
+    token_overlap = len(tokens_a & tokens_b) / min(len(tokens_a), len(tokens_b))
+    sequence_similarity = SequenceMatcher(
+        None,
+        answer_a.lower().strip(),
+        answer_b.lower().strip(),
+    ).ratio()
+
+    return (
+        token_overlap <= MAX_TOKEN_OVERLAP
+        and sequence_similarity <= MAX_SEQUENCE_SIMILARITY
+    )
+
+
+def has_good_steg_covertext(row):
+    options = row['options']
+
+    if not options or not all(is_sentence_long_answer(option) for option in options):
+        return False
+
+    for index, option in enumerate(options):
+        for other_option in options[index + 1:]:
+            if not are_fairly_different(option, other_option):
+                return False
+
+    return True
+
+
 def keep_highly_rated(row):
-    return row['category'] == 'health'
+    return row['category'] == 'health' and has_good_steg_covertext(row)
 
 dataset = load_dataset(dataset_name, split=split_name)
 filtered_dataset = dataset.filter(keep_highly_rated)
