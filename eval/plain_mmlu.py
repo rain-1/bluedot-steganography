@@ -21,7 +21,7 @@ from inspect_ai.solver import multiple_choice
 
 
 DEFAULT_DATASET_PATH = "outputs/MMLU-Pro-filtered"
-DEFAULT_MAX_TOKENS = 256
+DEFAULT_MAX_TOKENS = 4000
 DEFAULT_TEMPERATURE = 0.7
 DEFAULT_TOP_P = 0.8
 DEFAULT_TOP_K = 20
