@@ -87,7 +87,7 @@ def has_good_steg_covertext(row):
 
 
 def keep_highly_rated(row):
-    return row['category'] == 'health' and has_good_steg_covertext(row)
+    return has_good_steg_covertext(row)
 
 
 def parse_args():

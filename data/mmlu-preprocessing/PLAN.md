@@ -20,3 +20,7 @@ $ python data/mmlu-preprocessing/covertext_filter.py
 Saving the dataset (1/1 shards): 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 5/5 [00:00<00:00, 2233.39 examples/s]
 $ python utils/dataset_to_jsonl.py outputs/MMLU-Pro-filtered/ | jq
 ```
+
+We *heavily* restricted: Final count: 908
+This is OK for our purposes but something to keep in mind.
+
