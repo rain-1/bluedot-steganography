@@ -1,10 +1,10 @@
+import argparse
 import re
 from difflib import SequenceMatcher
 
 from datasets import load_dataset
 
 dataset_name = 'TIGER-Lab/MMLU-Pro'
-split_name = 'validation' # validation 70 rows, change to test for 12k rows
 
 MIN_ANSWER_WORDS = 8
 MAX_TOKEN_OVERLAP = 0.75
@@ -63,6 +63,19 @@ def has_good_steg_covertext(row):
 def keep_highly_rated(row):
     return row['category'] == 'health' and has_good_steg_covertext(row)
 
-dataset = load_dataset(dataset_name, split=split_name)
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--split',
+        choices=('validation', 'test'),
+        default='validation',
+        help='Dataset split to filter. validation has 70 rows; test has about 12k rows.',
+    )
+    return parser.parse_args()
+
+
+args = parse_args()
+dataset = load_dataset(dataset_name, split=args.split)
 filtered_dataset = dataset.filter(keep_highly_rated)
 filtered_dataset.save_to_disk("outputs/MMLU-Pro-filtered")
