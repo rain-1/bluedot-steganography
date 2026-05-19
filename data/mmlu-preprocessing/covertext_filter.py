@@ -105,3 +105,12 @@ args = parse_args()
 dataset = load_dataset(dataset_name, split=args.split)
 filtered_dataset = dataset.filter(keep_highly_rated)
 filtered_dataset.save_to_disk("outputs/MMLU-Pro-filtered")
+
+print(f"Final count: {len(filtered_dataset)}")
+
+for row in filtered_dataset.shuffle().select(range(min(5, len(filtered_dataset)))):
+    print()
+    print(f"Question: {row['question']}")
+    print("Answers:")
+    for option in row['options']:
+        print(f"- {option}")
